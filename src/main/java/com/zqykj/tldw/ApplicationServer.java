@@ -19,6 +19,6 @@ public class ApplicationServer implements CommandLineRunner {
 
     @Override
     public void run(String... strings) throws Exception {
-        System.out.println("test....");
+        System.out.println("ApplicationServer....");
     }
 }
