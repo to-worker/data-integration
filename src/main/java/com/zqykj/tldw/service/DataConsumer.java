@@ -1,6 +1,10 @@
 package com.zqykj.tldw.service;
 
 import com.netposa.recognize.model.ProviderVehicleInfo;
+import com.zqykj.hyjj.entity.elp.ElpModelDBMapping;
+import com.zqykj.hyjj.entity.elp.Entity;
+import com.zqykj.hyjj.entity.elp.Link;
+import com.zqykj.tldw.bussiness.ElpTransformer;
 import com.zqykj.tldw.common.Constants;
 import com.zqykj.tldw.solr.SolrClient;
 import com.zqykj.tldw.util.BeanUtils;
@@ -9,8 +13,10 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.collections.CollectionUtils;
 
 import java.util.*;
 
@@ -28,7 +34,7 @@ public class DataConsumer implements Runnable {
     int partition = -1;
     String zkHost;
     String collectionName;
-    SolrClient solrClient;
+    SolrClient solrClient = null;
 
     public DataConsumer(Properties properties, int partition, String topic, String zkHost, String collectionName) {
         this.consumerName = "DataConsumer-" + partition;
@@ -39,34 +45,39 @@ public class DataConsumer implements Runnable {
 
         this.zkHost = zkHost;
         this.collectionName = collectionName;
-        this.solrClient = new SolrClient(zkHost, collectionName);
+        solrClient = new SolrClient(zkHost, collectionName);
     }
 
     @Override
     public void run() {
+        Link bayonetLink = ELP_MODEL_LINK_PROPERTY.get(Constants.LINK_BAYONET_PASS_RECORD);
+        Entity vehicleEntity = ELP_MODEL_ENTITY_PROPERTY.get(Constants.ENTITY_VEHICLE);
         while (true) {
             try {
-                Map<String, List<Map<String, Object>>> mapLists = new HashMap<String, List<Map<String, Object>>>();
-                List<Map<String, Object>> bayonetRecordList = new ArrayList<Map<String, Object>>();
-                List<Map<String, Object>> vehicleList = new ArrayList<Map<String, Object>>();
+                List<Map<String, Object>> bayonetRecordList = new ArrayList<>();
+                List<Map<String, Object>> vehicleList = new ArrayList<>();
                 // fetch data from kafka
                 ConsumerRecords<String, byte[]> records = consumer.poll(Constants.ZK_TIME_OUT_DEFAULT);
                 for (ConsumerRecord<String, byte[]> record : records) {
                     ProviderVehicleInfo vehicleInfo = (ProviderVehicleInfo) BeanUtils.toObject(record.value());
                     dataLogger.debug("卡口ID: {}", vehicleInfo.getKkbh());
-                    dataLogger.debug("车道ID: {},车道方向: {}", vehicleInfo.getCdbh(), vehicleInfo.getCdfx());
+                    dataLogger.debug("车道ID: {}, 车道方向: {}", vehicleInfo.getCdbh(), vehicleInfo.getCdfx());
                     dataLogger.debug("车辆编号: {}, 车辆速度: {}", vehicleInfo.getCdbh(), vehicleInfo.getClsd());
 
                     Map<String, Object> beanMap = ObjAnalysis.convertObjToMap(vehicleInfo);
+                    beanMap.put("hphmId", vehicleInfo.getHphm());
 
                     bayonetRecordList.add(getColMapValue(beanMap, BAYONET_ELPTYPE_COLUMN_MAP, BAYONET_COLUMNS));
                     vehicleList.add(getColMapValue(beanMap, VEHICLE_ELPTYPE_COLUMN_MAP, VEHICLE_COLUMNS));
                 }
                 consumer.commitAsync();
-                // TODO elp trans
-                // TODO save to solr
+                //  1、elp trans； 2、persist to solr
+                persistSolr(bayonetRecordList, bayonetLink, ELPMODEL_DBMAPPINGS.get(Constants.LINK_BAYONET_PASS_RECORD));
+                //persistSolr(vehicleList, vehicleEntity);
+                Thread.sleep(4000);
             } catch (Exception e) {
                 dataLogger.error("occur to exception when consume data: {}", e.getStackTrace());
+            }finally {
             }
         }
     }
@@ -79,4 +90,54 @@ public class DataConsumer implements Runnable {
         }
         return recordMap;
     }
+
+    /**
+     * convert elpdata to SolrInputDocumnt and persist to solr.
+     *
+     * @param listMap
+     * @param element
+     */
+    public void persistSolr(List<Map<String, Object>> listMap, Link element, ElpModelDBMapping mapping) {
+        if (CollectionUtils.isNotEmpty(listMap)) {
+            //SolrClient solrClient = new SolrClient(zkHost, collectionName);
+            List<SolrInputDocument> solrDocs = new ArrayList<>();
+            for (Map<String, Object> bayonetRecord : listMap) {
+                SolrInputDocument solrInputDocument = ElpTransformer.parseLink(bayonetRecord, ELP_MODEL, element, mapping);
+                if (null != solrInputDocument) {
+                    solrDocs.add(solrInputDocument);
+                }
+                if (solrDocs.size() > 10000) {
+                    solrClient.sendBatchToSolr(solrDocs);
+                }
+            }
+            if (solrDocs.size() > 0) {
+                solrClient.sendBatchToSolr(solrDocs);
+            }
+            //solrClient.close();
+        }
+
+    }
+
+    public void persistSolr(List<Map<String, Object>> listMap, Entity element) {
+
+        if (CollectionUtils.isNotEmpty(listMap)) {
+            SolrClient solrClient = new SolrClient(zkHost, collectionName);
+            List<SolrInputDocument> solrDocs = new ArrayList<>();
+            for (Map<String, Object> record : listMap) {
+                SolrInputDocument solrInputDocument = ElpTransformer.parseEntity(record, ELP_MODEL, element);
+                if (null != solrInputDocument) {
+                    solrDocs.add(solrInputDocument);
+                }
+                if (solrDocs.size() > 10000) {
+                    solrClient.sendBatchToSolr(solrDocs);
+                }
+            }
+            if (solrDocs.size() > 0) {
+                solrClient.sendBatchToSolr(solrDocs);
+            }
+            solrClient.close();
+        }
+
+    }
+
 }

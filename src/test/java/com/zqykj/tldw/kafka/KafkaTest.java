@@ -5,6 +5,9 @@ import com.zqykj.tldw.service.Producer;
 import com.zqykj.tldw.util.BeanUtils;
 import org.junit.Test;
 
+import java.util.Date;
+import java.util.UUID;
+
 /**
  * @author feng.wei
  * @date 2018/5/9
@@ -17,7 +20,8 @@ public class KafkaTest {
         Producer<byte[]> producer = new Producer<byte[]>(topic);
         while (true) {
             ProviderVehicleInfo bean = new ProviderVehicleInfo();
-            bean.setHphm("苏A68UF");
+            bean.setKkbh(UUID.randomUUID().toString().substring(0,8));
+            bean.setHphm("苏A68UF" + UUID.randomUUID().toString().substring(0,2));
             bean.setCameraId("001");
             bean.setCdbh("车道01");
             bean.setCdfx("由西向东");
@@ -25,6 +29,8 @@ public class KafkaTest {
             bean.setCllx("jiaoche");
             // 车辆速度
             bean.setClsd(90);
+            bean.setJgsj(new Date().getTime() + "");
+
             bean.setTzsj("test".getBytes());
             bean.setHasExtractFeature(1);
             bean.setIodImageDown(true);

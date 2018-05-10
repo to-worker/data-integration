@@ -18,4 +18,10 @@ public interface ElpModelDao extends MongoRepository<ElpModel, String> {
     @Query("{'links':{'$elemMatch':{'properties':{'$elemMatch':{'uuid':?0}}}}}")
     ElpModel findByLinkProp(String propuuid, Sort sort);
 
+    @Query("{'links': {'$elemMatch': {'uuid':?0}}}")
+    ElpModel findByLinkUUid(String linkUuid, Sort sort);
+
+    @Query("{'entities': {'$elemMatch': {'uuid':?0}}}")
+    ElpModel findByEntityUUid(String linkUuid, Sort sort);
+
 }

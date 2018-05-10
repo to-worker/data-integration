@@ -9,7 +9,7 @@ public interface Constants {
     /**
      * kafka配置文件
      */
-    String CONFIG_JOB_KAFKA_PROPERTIES = "./config/job/kafka.properties";
+    String CONFIG_JOB_KAFKA_PROPERTIES = "./config/job/job.properties";
 
     /**
      * 车辆通行记录标识

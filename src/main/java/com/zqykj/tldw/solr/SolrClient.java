@@ -7,6 +7,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.util.Collection;
@@ -21,11 +22,17 @@ public class SolrClient {
 
     private CloudSolrClient cloudSolrClient;
     private String collection;
+    private String zkHost;
 
     public SolrClient(String zkHost, String collectin) {
+        this.zkHost = zkHost;
         this.collection = collectin;
-        this.cloudSolrClient = new CloudSolrClient(zkHost);
-        this.cloudSolrClient.setDefaultCollection(collectin);
+        initSolrCloudClient();
+    }
+
+    public void initSolrCloudClient() {
+        this.cloudSolrClient = new CloudSolrClient(this.zkHost);
+        this.cloudSolrClient.setDefaultCollection(this.collection);
     }
 
     public void sendBatchToSolr(Collection<SolrInputDocument> batch) {
@@ -71,6 +78,16 @@ public class SolrClient {
         Throwable rootCause = SolrException.getRootCause(exc);
         return (rootCause instanceof ConnectException || rootCause instanceof SocketException);
 
+    }
+
+    public void close() {
+        if (null == cloudSolrClient) {
+            try {
+                cloudSolrClient.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

@@ -34,13 +34,18 @@ public class ElpModelService {
         return elpModelDao.findByEntityProp(propuuid, sort);
     }
 
-    public ElpModel findElpByPropOfLink(String propuuid) {
+    public ElpModel findElpByLinkUuid(String linkUuid) {
         Sort sort = new Sort(Sort.Direction.DESC, "version");
-        return elpModelDao.findByLinkProp(propuuid, sort);
+        return elpModelDao.findByLinkUUid(linkUuid, sort);
     }
 
-    public Entity findEntityByProp(String propuuid) {
-        ElpModel model = findElpByPropOfEntity(propuuid);
+    public ElpModel findElpByEntityUuid(String entityUuid) {
+        Sort sort = new Sort(Sort.Direction.DESC, "version");
+        return elpModelDao.findByEntityUUid(entityUuid, sort);
+    }
+
+    public Entity findEntityByEntityUuid(String entityUuid) {
+        ElpModel model = findElpByEntityUuid(entityUuid);
         if (null == model) {
             return null;
         }
@@ -49,12 +54,8 @@ public class ElpModelService {
             return null;
         }
         for (Entity entity : entities) {
-            List<Property> propties = entity.getProperties();
-            if (CollectionUtils.isEmpty(propties)) {
-                continue;
-            }
-            for (Property prop : propties) {
-                if (propuuid.equals(prop.getUuid())) {
+            if (null != entity.getUuid()) {
+                if (entity.getUuid().equals(entityUuid)) {
                     return entity;
                 }
             }
@@ -62,9 +63,8 @@ public class ElpModelService {
         return null;
     }
 
-
-    public Link findLinkByProp(String propuuid) {
-        ElpModel model = findElpByPropOfLink(propuuid);
+    public Link findLinkByLinkUuid(String linkUuid) {
+        ElpModel model = findElpByLinkUuid(linkUuid);
         if (null == model) {
             return null;
         }
@@ -73,12 +73,8 @@ public class ElpModelService {
             return null;
         }
         for (Link link : links) {
-            List<Property> propties = link.getProperties();
-            if (CollectionUtils.isEmpty(propties)) {
-                continue;
-            }
-            for (Property prop : propties) {
-                if (propuuid.equals(prop.getUuid())) {
+            if (null != link.getUuid()) {
+                if (link.getUuid().equals(linkUuid)) {
                     return link;
                 }
             }

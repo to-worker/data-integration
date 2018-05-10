@@ -1,9 +1,11 @@
 package com.zqykj.tldw.common;
 
+import com.zqykj.hyjj.entity.elp.ElpModel;
 import com.zqykj.hyjj.entity.elp.ElpModelDBMapping;
 import com.zqykj.hyjj.entity.elp.Entity;
 import com.zqykj.hyjj.entity.elp.Link;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,16 +38,21 @@ public class ElpDBMappingCache {
     /**
      * 数据源与模型映射关系
      */
-    public static Map<String, ElpModelDBMapping> ELPMODEL_DBMAPPINGS = null;
+    public static Map<String, ElpModelDBMapping> ELPMODEL_DBMAPPINGS = new HashMap<>();
 
     /**
      * 模型实体
      */
-    public static Map<String, Entity> ELP_MODEL_ENTITY_PROPERTY = null;
+    public static Map<String, Entity> ELP_MODEL_ENTITY_PROPERTY = new HashMap<>();
 
     /**
      * 模型连接
      */
-    public static Map<String, Link> ELP_MODEL_LINK_PROPERTY = null;
+    public static Map<String, Link> ELP_MODEL_LINK_PROPERTY = new HashMap<>();
+
+    /**
+     * elp模型
+     */
+    public static ElpModel ELP_MODEL = null;
 
 }
