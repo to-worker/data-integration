@@ -1,5 +1,8 @@
 package com.zqykj.tldw.service;
 
+import com.zqykj.hyjj.entity.elp.ElpModelDBMapping;
+import com.zqykj.hyjj.entity.elp.Entity;
+import com.zqykj.hyjj.entity.elp.Link;
 import com.zqykj.tldw.common.Constants;
 import com.zqykj.tldw.common.ElpDBMappingCache;
 import com.zqykj.tldw.solr.SolrClient;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,6 +49,9 @@ public class ConsumeProcessor {
     @Autowired
     private ElpDBMappingService dbMappingService;
 
+    @Autowired
+    private ElpModelService elpModelService;
+
     @PostConstruct
     public void init() throws ConfigurationException {
 
@@ -64,23 +71,48 @@ public class ConsumeProcessor {
     public void initializeCache() {
         synchronized (ElpDBMappingCache.class) {
             if (null == ElpDBMappingCache.BAYONET_ELPTYPE_COLUMN_MAP){
+                ElpModelDBMapping dbMapping = dbMappingService.getElpModelDBMappingByElpTypeAndDs(
+                        config.getString("", "kafka"),
+                        config.getString("","bayonet_pass_record"),
+                        config.getString("","foshan_standard_model"),
+                        config.getString("","bayonet_pass_record"));
                 ElpDBMappingCache.BAYONET_ELPTYPE_COLUMN_MAP = dbMappingService
-                        .getElpColMap(dbMappingService.getElpModelDBMappingByElpTypeAndDs(
-                                config.getString("", "kafka"),
-                                config.getString("","bayonet_pass_record"),
-                                config.getString("","foshan_standard_model"),
-                                config.getString("","bayonet_pass_record")));
+                        .getElpColMap(dbMapping);
+
+                ElpDBMappingCache.ELPMODEL_DBMAPPINGS.put(Constants.LINK_BAYONET_PASS_RECORD, dbMapping);
+                Link link = elpModelService.findLinkByProp(Constants.LINK_BAYONET_PASS_RECORD);
+                ElpDBMappingCache.ELP_MODEL_LINK_PROPERTY.put(Constants.LINK_BAYONET_PASS_RECORD, link);
 
             }
 
             if (null == ElpDBMappingCache.VEHICLE_ELPTYPE_COLUMN_MAP){
+                ElpModelDBMapping dbMapping = dbMappingService.getElpModelDBMappingByElpTypeAndDs(
+                        config.getString("", "kafka"),
+                        config.getString("","bayonet_pass_record"),
+                        config.getString("","foshan_standard_model"),
+                        config.getString("","vehicle"));
                 ElpDBMappingCache.VEHICLE_ELPTYPE_COLUMN_MAP = dbMappingService
-                        .getElpColMap(dbMappingService.getElpModelDBMappingByElpTypeAndDs(
-                                config.getString("", "kafka"),
-                                config.getString("","bayonet_pass_record"),
-                                config.getString("","foshan_standard_model"),
-                                config.getString("","vehicle")));
+                        .getElpColMap(dbMapping);
 
+                ElpDBMappingCache.ELPMODEL_DBMAPPINGS.put(Constants.ENTITY_VEHICLE, dbMapping);
+                Entity entity = elpModelService.findEntityByProp(Constants.ENTITY_VEHICLE);
+                ElpDBMappingCache.ELP_MODEL_ENTITY_PROPERTY.put(Constants.ENTITY_VEHICLE, entity);
+
+
+            }
+
+            if (null == ElpDBMappingCache.BAYONET_COLUMNS){
+                Iterator<String> iterator = ElpDBMappingCache.BAYONET_ELPTYPE_COLUMN_MAP.keySet().iterator();
+                while (iterator.hasNext()){
+                    ElpDBMappingCache.BAYONET_COLUMNS.add(iterator.next());
+                }
+            }
+
+            if (null == ElpDBMappingCache.VEHICLE_COLUMNS){
+                Iterator<String> iterator = ElpDBMappingCache.VEHICLE_ELPTYPE_COLUMN_MAP.keySet().iterator();
+                while (iterator.hasNext()){
+                    ElpDBMappingCache.VEHICLE_COLUMNS.add(iterator.next());
+                }
             }
         }
 

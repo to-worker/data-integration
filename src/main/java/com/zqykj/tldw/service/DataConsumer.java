@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static com.zqykj.tldw.common.ElpDBMappingCache.*;
+
 /**
  * @author alfer
  */
@@ -56,12 +58,9 @@ public class DataConsumer implements Runnable {
                     dataLogger.debug("车辆编号: {}, 车辆速度: {}", vehicleInfo.getCdbh(), vehicleInfo.getClsd());
 
                     Map<String, Object> beanMap = ObjAnalysis.convertObjToMap(vehicleInfo);
-                    Set<Map.Entry<String, Object>> entrySet = beanMap.entrySet();
-                    Map<String, Object> columnValueMap = new HashMap<>();
-                    for (Map.Entry<String, Object> entry : entrySet) {
-                        dataLogger.info("key: {}, value: {}", entry.getKey(), entry.getValue());
-                        columnValueMap.put(entry.getKey(), entry.getValue());
-                    }
+
+                    bayonetRecordList.add(getColMapValue(beanMap, BAYONET_ELPTYPE_COLUMN_MAP, BAYONET_COLUMNS));
+                    vehicleList.add(getColMapValue(beanMap, VEHICLE_ELPTYPE_COLUMN_MAP, VEHICLE_COLUMNS));
                 }
                 consumer.commitAsync();
                 // TODO elp trans
@@ -72,7 +71,12 @@ public class DataConsumer implements Runnable {
         }
     }
 
-    public void getColMapValue() {
-
+    public Map<String, Object> getColMapValue(Map<String, Object> beanMap, Map<String, String> columnTypeMap,
+            List<String> columnList) {
+        Map<String, Object> recordMap = new HashMap<>();
+        for (String column : columnList) {
+            recordMap.put(columnTypeMap.get(column), beanMap.get(column));
+        }
+        return recordMap;
     }
 }

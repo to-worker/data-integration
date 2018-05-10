@@ -22,6 +22,7 @@
         <kafka.version>0.11.0.0</kafka.version>
         <plugin.maven.version>3.3</plugin.maven.version>
         <commons-configuration.version>1.8</commons-configuration.version>
+        <commons-collections.version>3.2.2</commons-collections.version>
         <solr.version>5.3.1</solr.version>
         <skip.tests>true</skip.tests>
         <tldw-core.version>0.11-SNAPSHOT</tldw-core.version>
@@ -58,6 +59,12 @@
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
             <version>${commons-configuration.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>${commons-collections.version}</version>
         </dependency>
 
         <!-- tldw version -->
