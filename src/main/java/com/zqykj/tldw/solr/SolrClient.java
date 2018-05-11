@@ -1,7 +1,9 @@
 package com.zqykj.tldw.solr;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.request.UpdateRequest;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
@@ -78,6 +80,19 @@ public class SolrClient {
         Throwable rootCause = SolrException.getRootCause(exc);
         return (rootCause instanceof ConnectException || rootCause instanceof SocketException);
 
+    }
+
+    public int deleteByQuery(String query){
+        int statusCode = -1;
+        try {
+            UpdateResponse response = cloudSolrClient.deleteByQuery(query);
+            statusCode = response.getStatus();
+        } catch (SolrServerException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return statusCode;
     }
 
     public void close() {

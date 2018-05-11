@@ -33,4 +33,6 @@ public interface Constants {
      */
     String SOLR_RELATION_COLLECTION = "global_foshan_standard_model_relation_index";
 
+    String QUERY_CONDITION_OPERATOR = ":";
+
 }
