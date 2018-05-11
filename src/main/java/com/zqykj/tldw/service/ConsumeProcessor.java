@@ -64,7 +64,7 @@ public class ConsumeProcessor {
         int partitions = config.getInt("kafka.topic.partitions");
         for (int i = 0; i < partitions; i++) {
             DataConsumer dataConsumer = new DataConsumer(properties, i, config.getString("kafka.topic.name"),
-                    config.getString("solr.zk.host"), config.getString("solr.collection.name"));
+                    config.getString("solr.zk.host"));
             executorService.execute(dataConsumer);
         }
     }

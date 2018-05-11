@@ -23,4 +23,14 @@ public interface Constants {
 
     Integer ZK_TIME_OUT_DEFAULT = 30000;
 
+    /**
+     * solr实体collection
+     */
+    String SOLR_ENTITY_COLLECTION = "global_foshan_standard_model_entity_index";
+
+    /**
+     * solr连接collection
+     */
+    String SOLR_RELATION_COLLECTION = "global_foshan_standard_model_relation_index";
+
 }

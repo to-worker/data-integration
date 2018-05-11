@@ -33,10 +33,10 @@ public class DataConsumer implements Runnable {
     KafkaConsumer<String, byte[]> consumer;
     int partition = -1;
     String zkHost;
-    String collectionName;
     SolrClient solrClient = null;
+    SolrClient entitySolrClient = null;
 
-    public DataConsumer(Properties properties, int partition, String topic, String zkHost, String collectionName) {
+    public DataConsumer(Properties properties, int partition, String topic, String zkHost) {
         this.consumerName = "DataConsumer-" + partition;
         this.partition = partition;
         consumer = new KafkaConsumer<String, byte[]>(properties);
@@ -44,8 +44,8 @@ public class DataConsumer implements Runnable {
         consumer.assign(Arrays.asList(topicPartition));
 
         this.zkHost = zkHost;
-        this.collectionName = collectionName;
-        solrClient = new SolrClient(zkHost, collectionName);
+        solrClient = new SolrClient(zkHost, Constants.SOLR_RELATION_COLLECTION);
+        entitySolrClient = new SolrClient(zkHost, Constants.SOLR_ENTITY_COLLECTION);
     }
 
     @Override
@@ -72,12 +72,13 @@ public class DataConsumer implements Runnable {
                 }
                 consumer.commitAsync();
                 //  1、elp trans； 2、persist to solr
-                persistSolr(bayonetRecordList, bayonetLink, ELPMODEL_DBMAPPINGS.get(Constants.LINK_BAYONET_PASS_RECORD));
-                //persistSolr(vehicleList, vehicleEntity);
+                // persistSolr(bayonetRecordList, bayonetLink, ELPMODEL_DBMAPPINGS.get(Constants.LINK_BAYONET_PASS_RECORD));
+                persistSolr(vehicleList, vehicleEntity);
                 Thread.sleep(4000);
             } catch (Exception e) {
                 dataLogger.error("occur to exception when consume data: {}", e.getStackTrace());
             }finally {
+
             }
         }
     }
@@ -99,11 +100,11 @@ public class DataConsumer implements Runnable {
      */
     public void persistSolr(List<Map<String, Object>> listMap, Link element, ElpModelDBMapping mapping) {
         if (CollectionUtils.isNotEmpty(listMap)) {
-            //SolrClient solrClient = new SolrClient(zkHost, collectionName);
             List<SolrInputDocument> solrDocs = new ArrayList<>();
             for (Map<String, Object> bayonetRecord : listMap) {
                 SolrInputDocument solrInputDocument = ElpTransformer.parseLink(bayonetRecord, ELP_MODEL, element, mapping);
                 if (null != solrInputDocument) {
+                    solrInputDocument.setField("_indexed_at_tdt", new Date());
                     solrDocs.add(solrInputDocument);
                 }
                 if (solrDocs.size() > 10000) {
@@ -113,7 +114,6 @@ public class DataConsumer implements Runnable {
             if (solrDocs.size() > 0) {
                 solrClient.sendBatchToSolr(solrDocs);
             }
-            //solrClient.close();
         }
 
     }
@@ -121,21 +121,20 @@ public class DataConsumer implements Runnable {
     public void persistSolr(List<Map<String, Object>> listMap, Entity element) {
 
         if (CollectionUtils.isNotEmpty(listMap)) {
-            SolrClient solrClient = new SolrClient(zkHost, collectionName);
             List<SolrInputDocument> solrDocs = new ArrayList<>();
             for (Map<String, Object> record : listMap) {
                 SolrInputDocument solrInputDocument = ElpTransformer.parseEntity(record, ELP_MODEL, element);
                 if (null != solrInputDocument) {
+                    solrInputDocument.setField("_indexed_at_tdt", new Date());
                     solrDocs.add(solrInputDocument);
                 }
                 if (solrDocs.size() > 10000) {
-                    solrClient.sendBatchToSolr(solrDocs);
+                    entitySolrClient.sendBatchToSolr(solrDocs);
                 }
             }
             if (solrDocs.size() > 0) {
-                solrClient.sendBatchToSolr(solrDocs);
+                entitySolrClient.sendBatchToSolr(solrDocs);
             }
-            solrClient.close();
         }
 
     }

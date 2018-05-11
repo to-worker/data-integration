@@ -35,8 +35,8 @@ public class Producer<T> {
         producer.send(record, new Callback() {
             @Override
             public void onCompletion(RecordMetadata metadata, Exception e) {
-                logger.debug("time=" + record.timestamp() + " ,key=" + record.key() + " ,value=" + record.value()
-                        + " ,partition " + metadata.partition() + ", offset: " + metadata.offset());
+//                logger.debug("time=" + record.timestamp() + " ,key=" + record.key() + " ,value=" + record.value()
+//                        + " ,partition " + metadata.partition() + ", offset: " + metadata.offset());
             }
         });
     }

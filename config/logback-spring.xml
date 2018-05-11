@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
+    <property name="LOG_HOME" value="/var/log"/>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%L line] -- %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ERROR级别日志 -->
+    <!-- 滚动记录文件，先将日志记录到指定文件，当符合某个条件时，将日志记录到其他文件 RollingFileAppender-->
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/tldw-server/tldw-service.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/tldw-server/tldw-service.log.%i</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>20</maxIndex>
+        </rollingPolicy>
+
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>100MB</maxFileSize>
+        </triggeringPolicy>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger [%L line] -- %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <logger name="com.thinkaurelius.titan" level="INFO"
+            additivity="false">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="file"/>
+    </logger>
+    <logger name="com.zqykj.hyjj" level="INFO"
+            additivity="false">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="file"/>
+    </logger>
+    <logger name="com.zqykj.hyjj.entity.graph.Graph" level="INFO"
+            additivity="false">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="file"/>
+    </logger>
+
+    <root level="INFO">
+        <!-- 控制台输出 -->
+        <appender-ref ref="STDOUT"/>
+        <!-- 文件输出 -->
+        <appender-ref ref="file"/>
+    </root>
+</configuration>
