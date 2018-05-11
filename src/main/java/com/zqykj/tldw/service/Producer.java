@@ -20,7 +20,7 @@ public class Producer<T> {
 
     public Producer(String topic) {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "zqykjdev14:9092");
+        props.put("bootstrap.servers", "172.30.6.32:9092");
         props.put("acks", "1");
         props.put("retries", 0);
         props.put("batch.size", 16384);

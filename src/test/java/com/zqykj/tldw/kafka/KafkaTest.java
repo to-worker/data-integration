@@ -21,6 +21,7 @@ public class KafkaTest {
         while (true) {
             ProviderVehicleInfo bean = new ProviderVehicleInfo();
             bean.setKkbh(UUID.randomUUID().toString().substring(0,8));
+            // "苏A68UF" + UUID.randomUUID().toString().substring(0,2)
             bean.setHphm("苏A68UF" + UUID.randomUUID().toString().substring(0,2));
             bean.setCameraId("001");
             bean.setCdbh("车道01");
@@ -36,7 +37,7 @@ public class KafkaTest {
             bean.setIodImageDown(true);
             producer.send(BeanUtils.toByteArray(bean));
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

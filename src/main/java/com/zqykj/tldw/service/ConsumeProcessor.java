@@ -66,6 +66,13 @@ public class ConsumeProcessor {
             DataConsumer dataConsumer = new DataConsumer(properties, i, config.getString("kafka.topic.name"),
                     config.getString("solr.zk.host"));
             executorService.execute(dataConsumer);
+            Runtime.getRuntime().addShutdownHook(new Thread(dataConsumer){
+                @Override
+                public void run() {
+                    logger.warn("topic: {}, partition: {}, offsets from {} to {}.", dataConsumer.topic,
+                            dataConsumer.partition, dataConsumer.fromOffsets, dataConsumer.toOffsets);
+                }
+            });
         }
     }
 

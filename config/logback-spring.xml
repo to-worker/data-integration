@@ -5,27 +5,27 @@
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%L line] -- %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger [%L] -- %msg%n</pattern>
         </encoder>
     </appender>
 
     <!-- ERROR级别日志 -->
     <!-- 滚动记录文件，先将日志记录到指定文件，当符合某个条件时，将日志记录到其他文件 RollingFileAppender-->
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_HOME}/tldw-server/tldw-service.log</file>
+        <file>${LOG_HOME}/tldw-data-integration/data-integration.log</file>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
             <fileNamePattern>${LOG_HOME}/tldw-server/tldw-service.log.%i</fileNamePattern>
             <minIndex>1</minIndex>
-            <maxIndex>20</maxIndex>
+            <maxIndex>10</maxIndex>
         </rollingPolicy>
 
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <maxFileSize>100MB</maxFileSize>
+            <maxFileSize>10MB</maxFileSize>
         </triggeringPolicy>
 
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger [%L line] -- %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger [%L] -- %msg%n</pattern>
         </encoder>
     </appender>
 

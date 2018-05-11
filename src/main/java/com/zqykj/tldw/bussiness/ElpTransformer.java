@@ -23,6 +23,7 @@ public class ElpTransformer {
     private static ElpPropertyTransformConfigService transCfgService = null;
 
     public static void init(String mongoIp, int mongoPort, String mongoDB){
+        logger.info("init ElpPropertyTransformConfigService with ip:{}, port:{}, db:{}", mongoIp, mongoPort, mongoDB);
         transCfgService = new ElpPropertyTransformConfigService(mongoIp, mongoPort, mongoDB);
     }
 
