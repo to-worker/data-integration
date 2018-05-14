@@ -6,19 +6,14 @@ import com.zqykj.hyjj.entity.elp.Link;
 import com.zqykj.tldw.bussiness.ElpTransformer;
 import com.zqykj.tldw.common.Constants;
 import com.zqykj.tldw.common.ElpDBMappingCache;
-import com.zqykj.tldw.solr.SolrClient;
-import com.zqykj.tldw.util.BeanUtils;
+import com.zqykj.tldw.common.TldwConfig;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -35,10 +30,10 @@ public class ConsumeProcessor {
 
     private static Logger logger = LoggerFactory.getLogger(ConsumeProcessor.class);
 
-    /**
-     * 任务的固定配置参数
-     */
-    private Configuration config;
+    Configuration config = TldwConfig.config;
+
+    @Value("${solr.zk.host}")
+    private String zkHost;
 
     /**
      * 线程执行器,每个partition一个线程
@@ -54,7 +49,6 @@ public class ConsumeProcessor {
     @PostConstruct
     public void init() throws ConfigurationException {
 
-        config = new PropertiesConfiguration(Constants.CONFIG_JOB_KAFKA_PROPERTIES);
         initializeCache();
         ElpTransformer.init(config.getString("job.mongo.hostname",""),
                 config.getInt("job.mongo.port",27017),
@@ -64,7 +58,7 @@ public class ConsumeProcessor {
         int partitions = config.getInt("kafka.topic.partitions");
         for (int i = 0; i < partitions; i++) {
             DataConsumer dataConsumer = new DataConsumer(properties, i, config.getString("kafka.topic.name"),
-                    config.getString("solr.zk.host"));
+                    zkHost);
             executorService.execute(dataConsumer);
             Runtime.getRuntime().addShutdownHook(new Thread(dataConsumer){
                 @Override

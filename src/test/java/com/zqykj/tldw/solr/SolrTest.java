@@ -18,8 +18,24 @@ public class SolrTest {
     }
 
     @Test
-    public void testGetUTCTime(){
-        System.out.println(DateUtils.getUTCTime(-7));
+    public void testGetUTCTime() {
+        System.out.println(DateUtils.getUTCTime(-1));
+    }
+
+    @Test
+    public void testUTCTime() {
+        //1、取得本地时间：
+        final java.util.Calendar cal = java.util.Calendar.getInstance();
+        System.out.println("取得本地时间:" + cal.getTime());
+        //2、取得时间偏移量：
+        final int zoneOffset = cal.get(java.util.Calendar.ZONE_OFFSET);
+        System.out.println("取得时间偏移量:" + zoneOffset);
+        //3、取得夏令时差：
+        final int dstOffset = cal.get(java.util.Calendar.DST_OFFSET);
+        System.out.println("取得夏令时差:" + dstOffset);
+        //4、从本地时间里扣除这些差量，即可以取得UTC时间：
+        cal.add(java.util.Calendar.MILLISECOND, -(zoneOffset + dstOffset));
+        System.err.println("取得UTC时间:" + cal.getTime());
     }
 
 }
