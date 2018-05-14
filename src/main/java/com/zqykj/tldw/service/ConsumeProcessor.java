@@ -7,6 +7,7 @@ import com.zqykj.tldw.bussiness.ElpTransformer;
 import com.zqykj.tldw.common.Constants;
 import com.zqykj.tldw.common.ElpDBMappingCache;
 import com.zqykj.tldw.common.TldwConfig;
+import com.zqykj.tldw.timed.CleanSolrData;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -45,6 +46,9 @@ public class ConsumeProcessor {
 
     @Autowired
     private ElpModelService elpModelService;
+
+    @Autowired
+    private CleanSolrData cleanSolrData;
 
     @PostConstruct
     public void init() throws ConfigurationException {
@@ -136,6 +140,7 @@ public class ConsumeProcessor {
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, config.getString("kafka.offset.reset"));
         properties
                 .put(ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, config.getInt("kafka.max.partition.fetch.bytes"));
+        properties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, config.getInt("kafka.max.poll.records"));
         properties.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "30000");
         properties.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, "30000");
 

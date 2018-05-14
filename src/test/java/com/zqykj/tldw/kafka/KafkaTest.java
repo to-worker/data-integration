@@ -36,11 +36,11 @@ public class KafkaTest {
             bean.setHasExtractFeature(1);
             bean.setIodImageDown(true);
             producer.send(BeanUtils.toByteArray(bean));
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Thread.sleep(0);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 }

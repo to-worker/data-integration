@@ -3,7 +3,7 @@ target/
 log/*
 logs/*
 */logs/*
-*.jar
+data-integration-*-SNAPSHOT.jar
 
 ### STS ###
 .apt_generated

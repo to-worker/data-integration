@@ -1,6 +1,5 @@
 package com.zqykj.tldw;
 
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
@@ -13,14 +12,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @ComponentScan({ "com.zqykj" })
-public class ApplicationServer implements CommandLineRunner {
+public class ApplicationServer {
 
     public static void main(String[] args) {
         SpringApplication.run(ApplicationServer.class, args);
     }
 
-    @Override
-    public void run(String... strings) throws Exception {
-        System.out.println("ApplicationServer....");
-    }
 }

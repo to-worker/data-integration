@@ -7,6 +7,7 @@ import com.zqykj.hyjj.entity.elp.Entity;
 import com.zqykj.hyjj.entity.elp.Link;
 import com.zqykj.tldw.bussiness.ElpTransformer;
 import com.zqykj.tldw.common.Constants;
+import com.zqykj.tldw.common.TldwConfig;
 import com.zqykj.tldw.solr.SolrClient;
 import com.zqykj.tldw.util.BeanUtils;
 import com.zqykj.tldw.util.ObjAnalysis;
@@ -43,6 +44,11 @@ public class DataConsumer implements Runnable {
     SolrClient relationSolrClient = null;
     SolrClient entitySolrClient = null;
 
+    Long startTime;
+    Long endTime;
+    List<Map<String, Object>> bayonetRecordList = null;
+    List<Map<String, Object>> vehicleList = null;
+
     public DataConsumer(Properties properties, int partition, String topic, String zkHost) {
         this.consumerName = "DataConsumer-" + partition;
         dataLogger.info("partition: {}, topic: {}, zkHost:{}", partition, topic, zkHost);
@@ -72,8 +78,9 @@ public class DataConsumer implements Runnable {
 
         while (true) {
             try {
-                List<Map<String, Object>> bayonetRecordList = new ArrayList<>();
-                List<Map<String, Object>> vehicleList = new ArrayList<>();
+                startTime = System.currentTimeMillis();
+                bayonetRecordList = new ArrayList<>();
+                vehicleList = new ArrayList<>();
                 // fetch data from kafka
                 ConsumerRecords<String, byte[]> records = consumer.poll(Constants.ZK_TIME_OUT_DEFAULT);
                 List<ConsumerRecord<String, byte[]>> recordList = records.records(topicPartition);
@@ -93,17 +100,24 @@ public class DataConsumer implements Runnable {
                         bayonetRecordList.add(getColMapValue(beanMap, BAYONET_ELPTYPE_COLUMN_MAP, BAYONET_COLUMNS));
                         vehicleList.add(getColMapValue(beanMap, VEHICLE_ELPTYPE_COLUMN_MAP, VEHICLE_COLUMNS));
                     }
+                    //  1、elp trans； 2、persist to solr
+                    persistSolr(bayonetRecordList, bayonetLink,
+                            ELPMODEL_DBMAPPINGS.get(Constants.LINK_BAYONET_PASS_RECORD));
+                    persistSolr(vehicleList, vehicleEntity);
+                }else {
+                    toOffsets = fromOffsets;
+                    continue;
                 }
-                //  1、elp trans； 2、persist to solr
-                persistSolr(bayonetRecordList, bayonetLink,
-                        ELPMODEL_DBMAPPINGS.get(Constants.LINK_BAYONET_PASS_RECORD));
-                persistSolr(vehicleList, vehicleEntity);
-                Thread.sleep(10000);
+
+                Thread.sleep(TldwConfig.config.getLong("kafka.fetch.interval.millisecond", 4000));
             } catch (Exception e) {
                 dataLogger.error("occur to exception when consume data: {}", e);
             } finally {
-                dataLogger.info("topic: {}, partition: {}, offsets from {} to {}.", topicPartition.topic(),
-                        topicPartition.partition(), fromOffsets, toOffsets);
+                endTime = System.currentTimeMillis();
+                dataLogger.info("topic: {}, partition: {}, offsets from {} to {}, total: {}, spend time: {}.", topicPartition.topic(),
+                        topicPartition.partition(), fromOffsets,
+                        toOffsets, toOffsets > fromOffsets ? (toOffsets - fromOffsets + 1) : (toOffsets - fromOffsets),
+                        (endTime - startTime));
                 consumer.commitAsync();
             }
 

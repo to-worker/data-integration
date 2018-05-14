@@ -49,6 +49,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.kafka</groupId>
@@ -128,6 +132,11 @@
             <version>${solr.version}</version>
         </dependency>
 
+        <!-- netpost -->
+        <!--<dependency>-->
+        <!--<groupId></groupId>-->
+        <!--<artifactId></artifactId>-->
+        <!--</dependency>-->
     </dependencies>
 
     <repositories>
@@ -155,6 +164,10 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
+                    <compilerArgs>
+                        <arg>-extdirs</arg>
+                        <arg>${project.basedir}/lib</arg>
+                    </compilerArgs>
                 </configuration>
                 <executions>
                     <execution>
@@ -176,14 +189,14 @@
             </plugin>
 
             <!-- 指定打出的jar包的目录 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
-                <configuration>
-                    <outputDirectory>${project.basedir}</outputDirectory>
-                </configuration>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-jar-plugin</artifactId>-->
+                <!--<version>2.3.1</version>-->
+                <!--<configuration>-->
+                    <!--<outputDirectory>${project.basedir}</outputDirectory>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
 
 
             <!-- 将依赖打入包中 -->
@@ -237,6 +250,9 @@
                         <goals>
                             <goal>repackage</goal>
                         </goals>
+                        <configuration>
+                            <excludeGroupIds>com.zqykj,com.zqykj.commons</excludeGroupIds>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
