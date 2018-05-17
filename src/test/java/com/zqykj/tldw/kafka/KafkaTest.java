@@ -16,9 +16,11 @@ public class KafkaTest {
 
     @Test
     public void testSend() {
-        String topic = "iod_gcjlout";
+        String topic = "foshan_test";
         Producer<byte[]> producer = new Producer<byte[]>(topic);
-        while (true) {
+        int i = 0;
+        while (i < 40) {
+            i++;
             ProviderVehicleInfo bean = new ProviderVehicleInfo();
             bean.setKkbh(UUID.randomUUID().toString().substring(0,8));
             // "苏A68UF" + UUID.randomUUID().toString().substring(0,2)

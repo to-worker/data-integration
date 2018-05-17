@@ -1,5 +1,6 @@
 package com.zqykj.tldw.service;
 
+import com.zqykj.tldw.common.TldwConfig;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -20,14 +21,20 @@ public class Producer<T> {
 
     public Producer(String topic) {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "172.30.6.32:9092");
-        props.put("acks", "1");
-        props.put("retries", 0);
+        props.put("bootstrap.servers", TldwConfig.config.getString("kafka.bootstrap.servers"));
+        props.put("acks", "-1");
         props.put("batch.size", 16384);
+        //props.put("transactional.id", "td1");
+        props.put("retries", 1);
+        props.put("client.id", "foshanClient");
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.ByteArraySerializer");
         producer = new KafkaProducer<String, T>(props);
         this.topic = topic;
+    }
+
+    public KafkaProducer<String, T> getProducer() {
+        return this.producer;
     }
 
     public void send(T t) {
@@ -35,8 +42,8 @@ public class Producer<T> {
         producer.send(record, new Callback() {
             @Override
             public void onCompletion(RecordMetadata metadata, Exception e) {
-                logger.debug("key=" + record.key() + " ,value=" + record.value() + "size=" + record.value().toString().getBytes().length
-                        + " ,partition " + metadata.partition() + ", offset: " + metadata.offset());
+                logger.debug("key=" + record.key() + " ,value=" + record.value() + "size=" + record.value().toString()
+                        .getBytes().length + " ,partition " + metadata.partition() + ", offset: " + metadata.offset());
             }
         });
     }

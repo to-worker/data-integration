@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <!--对实体 "useSSL" 的引用必须以 ';' 分隔符结尾的解决办法：只需要在&后面加上&amp;-->
+                <property name="url"
+                          value="jdbc:mysql://172.30.6.50:3306/foshan_test?useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false"/>
+                <property name="username" value="root"/>
+                <property name="password" value="123456"/>
+            </dataSource>
+
+            <!-- <dataSource type="POOLED">
+                 <property name="driver" value="oracle.jdbc.driver.OracleDriver"/>
+                 &lt;!&ndash;对实体 "useSSL" 的引用必须以 ';' 分隔符结尾的解决办法：只需要在&后面加上&amp;&ndash;&gt;
+                 <property name="url"
+                           value="jdbc:oracle:thin:@//192.168.0.206:1521/orcl11gXDB.us.oracle.com"/>
+                 <property name="username" value="scott"/>
+                 <property name="password" value="zqykj"/>
+             </dataSource>-->
+        </environment>
+    </environments>
+
+    <!-- mappers配置规则： http://www.mybatis.org/mybatis-3/zh/configuration.html#mappers-->
+    <mappers>
+        <!-- Using mapper interface classes -->
+        <mapper class="com.zqykj.tldw.tool.mapper.BayonetRecordMapper"/>
+
+        <!-- Register all interfaces in a package as mappers -->
+        <!--<package name="cn.insight.crawler.mapper"/>-->
+    </mappers>
+</configuration>

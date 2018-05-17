@@ -105,7 +105,7 @@ public class DataConsumer implements Runnable {
                             ELPMODEL_DBMAPPINGS.get(Constants.LINK_BAYONET_PASS_RECORD));
                     persistSolr(vehicleList, vehicleEntity);
                 }else {
-                    toOffsets = fromOffsets;
+                    fromOffsets = toOffsets;
                     continue;
                 }
 
