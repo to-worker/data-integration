@@ -10,6 +10,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -22,7 +23,7 @@ public class ElpTransformer {
 
     private static ElpPropertyTransformConfigService transCfgService = null;
 
-    public static void init(String mongoIp, int mongoPort, String mongoDB){
+    public static void init(String mongoIp, int mongoPort, String mongoDB) {
         logger.info("init ElpPropertyTransformConfigService with ip:{}, port:{}, db:{}", mongoIp, mongoPort, mongoDB);
         transCfgService = new ElpPropertyTransformConfigService(mongoIp, mongoPort, mongoDB);
     }
@@ -35,7 +36,8 @@ public class ElpTransformer {
      * @param element
      * @return
      */
-    public static SolrInputDocument parseLink(Map<String, Object> v, ElpModel elp, Link element, ElpModelDBMapping mapping) {
+    public static SolrInputDocument parseLink(Map<String, Object> v, ElpModel elp, Link element,
+            ElpModelDBMapping mapping) {
         String label = element.getLabelTemplate();
         Set<String> varNames = ELPUtils.parseVarNames(label);
         Map<String, String> varValues = new HashMap<>();
@@ -207,6 +209,7 @@ public class ElpTransformer {
     }
 
     private static Object getValue(final String key, final Object value, final PropertyBag element) {
+        PropertyType propertyType = element.getPropertyByUUID(key).getType();
         if (null != value && value instanceof Long) {
             if (element.getPropertyByUUID(key).getType().equals(PropertyType.datetime)) {
                 return new java.sql.Timestamp((Long) value);
@@ -226,6 +229,20 @@ public class ElpTransformer {
             }
             if (element.getPropertyByUUID(key).getType().equals(PropertyType.integer)) {
                 return new Integer((String) value);
+            }
+
+            try {
+                if (PropertyType.datetime.equals(propertyType) && value.toString().matches(JobConstants.REGEX_DATE_FORMATTER_DATETIME)) {
+                    return new SimpleDateFormat(JobConstants.FORMATTER_DATETIME).parse(value.toString());
+                } else if (PropertyType.date.equals(propertyType) && value.toString().matches(JobConstants.REGEX_DATE_FORMATTER_DATE)) {
+                    return new SimpleDateFormat(JobConstants.FORMATTER_DATE).parse(value.toString());
+                } else if (PropertyType.datetime.equals(propertyType) && value.toString().matches(JobConstants.REGEX_DATE_FORMATTER_DATE)){
+                    return new SimpleDateFormat(JobConstants.FORMATTER_DATETIME).parse(value.toString());
+                }else if (PropertyType.date.equals(propertyType) && value.toString().matches(JobConstants.REGEX_DATE_FORMATTER_DATETIME)){
+                    return new SimpleDateFormat(JobConstants.FORMATTER_DATE).parse(value.toString());
+                }
+            } catch (ParseException e) {
+                logger.error("Pattern mismatched,return null! Raw data:" + value + ", propertyType:" + propertyType, e);
             }
 
             if (element.getPropertyByUUID(key).getType().equals(PropertyType.date)) {

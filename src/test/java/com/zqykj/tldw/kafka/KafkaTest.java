@@ -1,10 +1,13 @@
 package com.zqykj.tldw.kafka;
 
 import com.netposa.recognize.model.ProviderVehicleInfo;
+import com.zqykj.tldw.common.JobConstants;
 import com.zqykj.tldw.service.Producer;
 import com.zqykj.tldw.util.BeanUtils;
 import org.junit.Test;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
@@ -43,6 +46,18 @@ public class KafkaTest {
 //            } catch (InterruptedException e) {
 //                e.printStackTrace();
 //            }
+        }
+    }
+
+    @Test
+    public void testDateFormat(){
+        String value = "2018-05-24 13:50:28.0";
+        Date date = null;
+        try {
+            date = new SimpleDateFormat(JobConstants.FORMATTER_DATETIME).parse(value.toString());
+            System.out.println(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
     }
 }

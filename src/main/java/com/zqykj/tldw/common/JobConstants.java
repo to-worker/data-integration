@@ -4,10 +4,6 @@ import com.zqykj.tldw.graph.core.query.db.GraphConstants;
 
 public class JobConstants {
 
-    public static final String FORMATTER_DATE = "yyyy-MM-dd";
-    public static final String FORMATTER_DATETIME = "yyyy-MM-dd HH:mm:ss";
-    public static final String FORMATTER_TIME = "HH:mm:ss";
-
     public static final String HBASE_TABLE_ROWKEY = GraphConstants.HBASE_TABLE_ROWKEY;
     public static final String VERTEX_LABEL = GraphConstants.VERTEX_LABEL_FILED;
     public static final String VERTEX_TYPE = GraphConstants.VERTEX_TYPE_FILED;
@@ -40,4 +36,13 @@ public class JobConstants {
      * 双向
      */
     public static final String DIRECTION_BIDIRECTIONAL = "2";
+
+    public static final String FORMATTER_DATE = "yyyy-MM-dd";
+    public static final String FORMATTER_DATETIME = "yyyy-MM-dd HH:mm:ss";
+    public static final String FORMATTER_TIME = "HH:mm:ss";
+    public static final String REGEX_DATE_FORMATTER_LONG = "^[0-9]+$";
+    public static final String REGEX_DATE_FORMATTER_DATE = "^[0-9]{4}(-[0-9]{1,2}){2}$";
+    public static final String REGEX_DATE_FORMATTER_DATETIME = "^[0-9]{4}(-[0-9]{1,2}){2}\\s[0-9]{1,2}(:[0-9]{1,2}){2}(.[0-9]*)?$";
+    public static final String REGEX_DATE_FORMATTER_TIME = "^[0-9]{1,2}(:[0-9]{1,2}){2}$";
+    public static final String REGEX_NUMBER_FORMAATER = "^\\d*.?\\d*$";
 }
