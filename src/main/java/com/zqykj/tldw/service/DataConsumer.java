@@ -65,8 +65,8 @@ public class DataConsumer implements Runnable {
         consumer.assign(Arrays.asList(topicPartition));
 
         this.zkHost = zkHost;
-        relationSolrClient = new SolrClient(zkHost, Constants.SOLR_RELATION_COLLECTION);
-        entitySolrClient = new SolrClient(zkHost, Constants.SOLR_ENTITY_COLLECTION);
+        relationSolrClient = new SolrClient(zkHost, TldwConfig.config.getString("solr.relation.collection","global_foshan_standard_model_relation_index"));
+        entitySolrClient = new SolrClient(zkHost, TldwConfig.config.getString("solr.entity.collection","global_foshan_standard_model_entity_index"));
     }
 
     @Override
@@ -92,7 +92,7 @@ public class DataConsumer implements Runnable {
                         ProviderVehicleInfo vehicleInfo = (ProviderVehicleInfo) BeanUtils.toObject(record.value());
                         dataLogger.debug("卡口ID: {}", vehicleInfo.getKkbh());
                         dataLogger.debug("车道ID: {}, 车道方向: {}", vehicleInfo.getCdbh(), vehicleInfo.getCdfx());
-                        dataLogger.debug("车辆编号: {}, 车辆速度: {}", vehicleInfo.getCdbh(), vehicleInfo.getClsd());
+                        dataLogger.debug("车辆编号: {}, 车辆速度: {}", vehicleInfo.getHphm(), vehicleInfo.getClsd());
 
                         Map<String, Object> beanMap = ObjAnalysis.convertObjToMap(vehicleInfo);
                         beanMap.put("hphmId", vehicleInfo.getHphm());
@@ -111,7 +111,7 @@ public class DataConsumer implements Runnable {
 
                 Thread.sleep(TldwConfig.config.getLong("kafka.fetch.interval.millisecond", 4000));
             } catch (Exception e) {
-                dataLogger.error("occur to exception when consume data: {}", e);
+                dataLogger.error("occur to exception when consume data.", e);
             } finally {
                 endTime = System.currentTimeMillis();
                 dataLogger.info("topic: {}, partition: {}, offsets from {} to {}, total: {}, spend time: {}.", topicPartition.topic(),
@@ -151,7 +151,7 @@ public class DataConsumer implements Runnable {
                     solrInputDocument.setField("_indexed_at_tdt", new Date());
                     solrDocs.add(solrInputDocument);
                 }
-                if (solrDocs.size() > 10000) {
+                if (solrDocs.size() > TldwConfig.config.getInt("solr.batch.size",10000)) {
                     relationSolrClient.sendBatchToSolr(solrDocs);
                 }
             }
@@ -173,7 +173,7 @@ public class DataConsumer implements Runnable {
                     solrInputDocument.setField("_indexed_at_tdt", new Date());
                     solrDocs.add(solrInputDocument);
                 }
-                if (solrDocs.size() > 10000) {
+                if (solrDocs.size() > TldwConfig.config.getInt("solr.batch.size",10000)) {
                     entitySolrClient.sendBatchToSolr(solrDocs);
                 }
             }

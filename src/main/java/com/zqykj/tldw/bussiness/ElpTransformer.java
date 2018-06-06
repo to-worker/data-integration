@@ -178,8 +178,10 @@ public class ElpTransformer {
             }
         }
 
+        String rowkey = idStr.toString() + "@" + element.getUuid();
+        logger.debug("entity rowkey: {}", rowkey);
         SolrInputDocument doc = new SolrInputDocument();
-        doc.setField(JobConstants.HBASE_TABLE_ROWKEY, idStr.toString() + "@" + element.getUuid());
+        doc.setField(JobConstants.HBASE_TABLE_ROWKEY, rowkey);
         doc.setField(JobConstants.VERTEX_ID, idStr.toString());
         doc.setField(JobConstants.VERTEX_TYPE, element.getUuid());
         try {

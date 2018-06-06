@@ -78,15 +78,15 @@ public class ConsumeProcessor {
         synchronized (ElpDBMappingCache.class) {
             if (null == ElpDBMappingCache.ELP_MODEL){
                 ElpDBMappingCache.ELP_MODEL =
-                        elpModelService.getElpModelByModelId(config.getString("","foshan_standard_model"));
+                        elpModelService.getElpModelByModelId(config.getString("elp.dbmap.elp.model.id","foshan_standard_model"));
             }
 
             if (null == ElpDBMappingCache.BAYONET_ELPTYPE_COLUMN_MAP){
                 ElpModelDBMapping dbMapping = dbMappingService.getElpModelDBMappingByElpTypeAndDs(
-                        config.getString("", "kafka"),
-                        config.getString("","bayonet_pass_record"),
-                        config.getString("","foshan_standard_model"),
-                        config.getString("","bayonet_pass_record"));
+                        config.getString("elp.dbmap.ds", "kafka"),
+                        config.getString("elp.dbmap.tablename.bpr","bayonet_pass_record"),
+                        config.getString("elp.dbmap.elp.model.id","foshan_standard_model"),
+                        config.getString("elp.dbmap.elp.type.bpr","bayonet_pass_record"));
                 ElpDBMappingCache.BAYONET_ELPTYPE_COLUMN_MAP = dbMappingService
                         .getElpColMap(dbMapping);
                 ElpDBMappingCache.ELPMODEL_DBMAPPINGS.put(Constants.LINK_BAYONET_PASS_RECORD, dbMapping);
@@ -97,18 +97,16 @@ public class ConsumeProcessor {
 
             if (null == ElpDBMappingCache.VEHICLE_ELPTYPE_COLUMN_MAP){
                 ElpModelDBMapping dbMapping = dbMappingService.getElpModelDBMappingByElpTypeAndDs(
-                        config.getString("", "kafka"),
-                        config.getString("","bayonet_pass_record"),
-                        config.getString("","foshan_standard_model"),
-                        config.getString("","vehicle"));
+                        config.getString("elp.dbmap.ds", "kafka"),
+                        config.getString("elp.dbmap.tablename.vehicle","bayonet_pass_record"),
+                        config.getString("elp.dbmap.elp.model.id","foshan_standard_model"),
+                        config.getString("elp.dbmap.elp.type.vehicle","vehicle"));
                 ElpDBMappingCache.VEHICLE_ELPTYPE_COLUMN_MAP = dbMappingService
                         .getElpColMap(dbMapping);
 
                 ElpDBMappingCache.ELPMODEL_DBMAPPINGS.put(Constants.ENTITY_VEHICLE, dbMapping);
                 Entity entity = elpModelService.findEntityByEntityUuid(Constants.ENTITY_VEHICLE);
                 ElpDBMappingCache.ELP_MODEL_ENTITY_PROPERTY.put(Constants.ENTITY_VEHICLE, entity);
-
-
             }
 
             if (null == ElpDBMappingCache.BAYONET_COLUMNS){
