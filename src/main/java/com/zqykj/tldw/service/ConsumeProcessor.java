@@ -11,6 +11,8 @@ import com.zqykj.tldw.timed.CleanSolrData;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.PartitionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +52,8 @@ public class ConsumeProcessor {
     @Autowired
     private CleanSolrData cleanSolrData;
 
+    private String topicName;
+
     @PostConstruct
     public void init() throws ConfigurationException {
 
@@ -59,9 +63,15 @@ public class ConsumeProcessor {
                 config.getString("job.mongo.database",""));
 
         Properties properties = consumerProperties();
-        int partitions = config.getInt("kafka.topic.partitions");
+        // TODO　get partitions of kafka
+        topicName = config.getString("kafka.topic.name");
+        KafkaConsumer consumer = new KafkaConsumer<String, byte[]>(properties);
+        List<PartitionInfo> partitionsFor = consumer.partitionsFor(topicName);
+        //config.getInt("kafka.topic.partitions");
+        int partitions = partitionsFor.size();
+        logger.info("topic:{} has {} partitions.", topicName, partitions);
         for (int i = 0; i < partitions; i++) {
-            DataConsumer dataConsumer = new DataConsumer(properties, i, config.getString("kafka.topic.name"),
+            DataConsumer dataConsumer = new DataConsumer(properties, i, topicName,
                     zkHost);
             executorService.execute(dataConsumer);
             Runtime.getRuntime().addShutdownHook(new Thread(dataConsumer){

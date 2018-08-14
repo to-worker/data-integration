@@ -63,6 +63,11 @@ public class DataConsumer implements Runnable {
         toOffsets = consumer.endOffsets(topicPartitions).get(topicPartition);
 
         consumer.assign(Arrays.asList(topicPartition));
+        // TODO manully manager kafka offsets
+        // get the last commited offset
+        //consumer.committed(topicPartition);
+        // seek the sepcial offset
+        //consumer.seek(topicPartition, 100);
 
         this.zkHost = zkHost;
         relationSolrClient = new SolrClient(zkHost, TldwConfig.config.getString("solr.relation.collection","global_foshan_standard_model_relation_index"));
