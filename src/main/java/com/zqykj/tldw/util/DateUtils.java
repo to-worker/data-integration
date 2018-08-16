@@ -2,6 +2,7 @@ package com.zqykj.tldw.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by weifeng on 2018/5/11.
@@ -27,6 +28,11 @@ public class DateUtils {
         // 6、时间格式化
         String time = sdf.format(cal.getTime());
         return time;
+    }
+
+    public static String getDate(){
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+        return format.format(new Date());
     }
 
 }

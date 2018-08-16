@@ -6,6 +6,7 @@ import com.zqykj.hyjj.query.PropertyData;
 import com.zqykj.tldw.common.JobConstants;
 import com.zqykj.tldw.util.Utils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.hadoop.mapreduce.Job;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ public class ElpTransformer {
      * @return
      */
     public static SolrInputDocument parseLink(Map<String, Object> v, ElpModel elp, Link element,
-            ElpModelDBMapping mapping) {
+            ElpModelDBMapping mapping){
         String label = element.getLabelTemplate();
         Set<String> varNames = ELPUtils.parseVarNames(label);
         Map<String, String> varValues = new HashMap<>();
@@ -234,7 +235,13 @@ public class ElpTransformer {
             }
 
             try {
-                if (PropertyType.datetime.equals(propertyType) && value.toString().matches(JobConstants.REGEX_DATE_FORMATTER_DATETIME)) {
+                if (PropertyType.datetime.equals(propertyType) && value.toString().matches(JobConstants.REGEX_DATE_FORMATTER_LONG)){
+                    SimpleDateFormat sdf = new SimpleDateFormat(JobConstants.FORMATTER_DATETIME);
+                    return sdf.parse(sdf.format(new Date((Long) value)));
+                }else if (PropertyType.date.equals(propertyType) && value.toString().matches(JobConstants.REGEX_DATE_FORMATTER_LONG)){
+                    SimpleDateFormat sdf = new SimpleDateFormat(JobConstants.FORMATTER_DATE);
+                    return sdf.parse(sdf.format(new Date((Long) value)));
+                }else if (PropertyType.datetime.equals(propertyType) && value.toString().matches(JobConstants.REGEX_DATE_FORMATTER_DATETIME)) {
                     return new SimpleDateFormat(JobConstants.FORMATTER_DATETIME).parse(value.toString());
                 } else if (PropertyType.date.equals(propertyType) && value.toString().matches(JobConstants.REGEX_DATE_FORMATTER_DATE)) {
                     return new SimpleDateFormat(JobConstants.FORMATTER_DATE).parse(value.toString());
@@ -288,8 +295,7 @@ public class ElpTransformer {
         return doc;
     }
 
-    private static String parseEntityId(final Link l, final String type, final Entity foreign,
-            final Map<String, Object> v) {
+    private static String parseEntityId(final Link l, final String type, final Entity foreign, final Map<String, Object> v){
         /**
          * 根据链接的外键引用匹配出源（或目标）实体的主键。生成id
          */

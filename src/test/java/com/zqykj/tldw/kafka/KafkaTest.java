@@ -5,7 +5,9 @@ import com.zqykj.tldw.common.JobConstants;
 import com.zqykj.tldw.common.TldwConfig;
 import com.zqykj.tldw.service.Producer;
 import com.zqykj.tldw.util.BeanUtils;
+import freemarker.template.SimpleDate;
 import org.apache.commons.configuration.Configuration;
+import org.apache.commons.net.ntp.TimeStamp;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
@@ -26,10 +28,10 @@ public class KafkaTest {
 
     @Test
     public void testSend() {
-        String topic = "foshan_test";
+        String topic = "nhga";
         Producer<byte[]> producer = new Producer<byte[]>(topic);
         int i = 0;
-        while (i < 40) {
+        while (i < 400) {
             i++;
             ProviderVehicleInfo bean = new ProviderVehicleInfo();
             bean.setKkbh(UUID.randomUUID().toString().substring(0,8));
@@ -43,6 +45,8 @@ public class KafkaTest {
             // 车辆速度
             bean.setClsd(90);
             bean.setJgsj(new Date().getTime() + "");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+            bean.setJgsj(sdf.format(TimeStamp.getCurrentTime().getDate()));
 
             bean.setTzsj("test".getBytes());
             bean.setHasExtractFeature(1);

@@ -70,8 +70,10 @@ public class DataConsumer implements Runnable {
         //consumer.seek(topicPartition, 100);
 
         this.zkHost = zkHost;
-        relationSolrClient = new SolrClient(zkHost, TldwConfig.config.getString("solr.relation.collection","global_foshan_standard_model_relation_index"));
-        entitySolrClient = new SolrClient(zkHost, TldwConfig.config.getString("solr.entity.collection","global_foshan_standard_model_entity_index"));
+        relationSolrClient = new SolrClient(zkHost,
+                TldwConfig.config.getString("solr.relation.collection", "global_foshan_standard_model_relation_index"));
+        entitySolrClient = new SolrClient(zkHost,
+                TldwConfig.config.getString("solr.entity.collection", "global_foshan_standard_model_entity_index"));
     }
 
     @Override
@@ -109,7 +111,14 @@ public class DataConsumer implements Runnable {
                     persistSolr(bayonetRecordList, bayonetLink,
                             ELPMODEL_DBMAPPINGS.get(Constants.LINK_BAYONET_PASS_RECORD));
                     persistSolr(vehicleList, vehicleEntity);
-                }else {
+                    endTime = System.currentTimeMillis();
+                    dataLogger.info("topic: {}, partition: {}, offsets from {} to {}, total: {}, spend time: {}.",
+                            topicPartition.topic(), topicPartition.partition(), fromOffsets, toOffsets,
+                            toOffsets > fromOffsets ? (toOffsets - fromOffsets + 1) : (toOffsets - fromOffsets),
+                            (endTime - startTime));
+                    consumer.commitAsync();
+                } else {
+                    dataLogger.info("{} 没有数据更新, 等待读取下一轮数据", consumerName);
                     fromOffsets = toOffsets;
                     continue;
                 }
@@ -118,12 +127,7 @@ public class DataConsumer implements Runnable {
             } catch (Exception e) {
                 dataLogger.error("occur to exception when consume data.", e);
             } finally {
-                endTime = System.currentTimeMillis();
-                dataLogger.info("topic: {}, partition: {}, offsets from {} to {}, total: {}, spend time: {}.", topicPartition.topic(),
-                        topicPartition.partition(), fromOffsets,
-                        toOffsets, toOffsets > fromOffsets ? (toOffsets - fromOffsets + 1) : (toOffsets - fromOffsets),
-                        (endTime - startTime));
-                consumer.commitAsync();
+
             }
 
         }
@@ -156,7 +160,7 @@ public class DataConsumer implements Runnable {
                     solrInputDocument.setField("_indexed_at_tdt", new Date());
                     solrDocs.add(solrInputDocument);
                 }
-                if (solrDocs.size() > TldwConfig.config.getInt("solr.batch.size",10000)) {
+                if (solrDocs.size() > TldwConfig.config.getInt("solr.batch.size", 10000)) {
                     relationSolrClient.sendBatchToSolr(solrDocs);
                 }
             }
@@ -178,7 +182,7 @@ public class DataConsumer implements Runnable {
                     solrInputDocument.setField("_indexed_at_tdt", new Date());
                     solrDocs.add(solrInputDocument);
                 }
-                if (solrDocs.size() > TldwConfig.config.getInt("solr.batch.size",10000)) {
+                if (solrDocs.size() > TldwConfig.config.getInt("solr.batch.size", 10000)) {
                     entitySolrClient.sendBatchToSolr(solrDocs);
                 }
             }

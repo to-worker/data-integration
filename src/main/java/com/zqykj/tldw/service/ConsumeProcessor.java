@@ -5,6 +5,7 @@ import com.zqykj.hyjj.entity.elp.Entity;
 import com.zqykj.hyjj.entity.elp.Link;
 import com.zqykj.tldw.bussiness.ElpTransformer;
 import com.zqykj.tldw.common.Constants;
+import com.zqykj.tldw.common.ConsumerProperty;
 import com.zqykj.tldw.common.ElpDBMappingCache;
 import com.zqykj.tldw.common.TldwConfig;
 import com.zqykj.tldw.timed.CleanSolrData;
@@ -28,7 +29,7 @@ import java.util.concurrent.Executors;
  * @author feng.wei
  * @date 2018/5/8
  */
-@Component
+@Component("consumeProcessor")
 public class ConsumeProcessor {
 
     private static Logger logger = LoggerFactory.getLogger(ConsumeProcessor.class);
@@ -54,7 +55,6 @@ public class ConsumeProcessor {
 
     private String topicName;
 
-    @PostConstruct
     public void init() throws ConfigurationException {
 
         initializeCache();
@@ -62,8 +62,7 @@ public class ConsumeProcessor {
                 config.getInt("job.mongo.port",27017),
                 config.getString("job.mongo.database",""));
 
-        Properties properties = consumerProperties();
-        // TODO　get partitions of kafka
+        Properties properties = ConsumerProperty.consumerProperties();
         topicName = config.getString("kafka.topic.name");
         KafkaConsumer consumer = new KafkaConsumer<String, byte[]>(properties);
         List<PartitionInfo> partitionsFor = consumer.partitionsFor(topicName);
@@ -82,6 +81,7 @@ public class ConsumeProcessor {
                 }
             });
         }
+        consumer.close();
     }
 
     public void initializeCache() {

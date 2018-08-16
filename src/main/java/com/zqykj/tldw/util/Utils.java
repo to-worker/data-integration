@@ -1,7 +1,10 @@
 package com.zqykj.tldw.util;
 
 import com.zqykj.hyjj.entity.elp.Property;
+import com.zqykj.tldw.common.JobConstants;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -13,6 +16,9 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Utils {
+
+    private static Logger logger = LoggerFactory.getLogger(Utils.class);
+
     public static final String LIST_SEPERATOR = ",";
 
     public static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd";
@@ -155,29 +161,35 @@ public class Utils {
         if (null == o) {
             return value;
         }
-        switch (p.getType()) {
-        case date:
-            if (o instanceof Long) {
-                value = Utils.format(new Date((Long) o), Utils.DEFAULT_DATE_PATTERN);
-            } else if (o instanceof String) {
-                value = (String) o;
-            } else if (o instanceof Date) {
-                value = Utils.format((Date) o, Utils.DEFAULT_DATE_PATTERN);
+        try {
+            switch (p.getType()) {
+            case date:
+                if (o instanceof Long) {
+                    value = Utils.format(new Date((Long) o), Utils.DEFAULT_DATE_PATTERN);
+                } else if (o instanceof String) {
+                    value = (String) o;
+                } else if (o instanceof Date) {
+                    value = Utils.format((Date) o, Utils.DEFAULT_DATE_PATTERN);
+                }
+                break;
+            case datetime:
+                if (o instanceof Long) {
+                    value = Utils.format(new Date((Long) o), Utils.DEFAULT_DATETIME_PATTERN);
+                } else if (o instanceof String) {
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(JobConstants.FORMATTER_DATETIME);
+                    value = simpleDateFormat.format(simpleDateFormat.parse((String) o));
+                } else if (o instanceof Date) {
+                    value = Utils.format((Date) o, Utils.DEFAULT_DATETIME_PATTERN);
+                }
+                break;
+            default:
+                value = o.toString();
+                break;
             }
-            break;
-        case datetime:
-            if (o instanceof Long) {
-                value = Utils.format(new Date((Long) o), Utils.DEFAULT_DATETIME_PATTERN);
-            } else if (o instanceof String) {
-                value = (String) o;
-            } else if (o instanceof Date) {
-                value = Utils.format((Date) o, Utils.DEFAULT_DATETIME_PATTERN);
-            }
-            break;
-        default:
-            value = o.toString();
-            break;
+        } catch (ParseException e) {
+            logger.error("parse {} to {} has errir: {}", o, p.getType(), e);
         }
+
         return value;
     }
 

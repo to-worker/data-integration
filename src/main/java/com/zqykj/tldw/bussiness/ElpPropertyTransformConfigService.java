@@ -82,11 +82,13 @@ public class ElpPropertyTransformConfigService implements java.io.Serializable{
     	/*Parse the value in 3 steps:*/
     	Date result = null;
     	/*First:Use bestfit at first*/
+		SimpleDateFormat bestFitFormatDatetime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     	if( null != bestFitFormatDatetime ) {
     		try {
 				result = bestFitFormatDatetime.parse(value);
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block
+				logger.error("parse error {}", e);
 			}
     	}
     	
